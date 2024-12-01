@@ -21,8 +21,8 @@ inputs:
 outputs:
   next_version:
     description: The next version without the prefix and postfix
-  previous_version:
-    description: The previous version without the prefix and postfix
+  current_version:
+    description: The current version without the prefix and postfix
 
 runs:
   using: node20
