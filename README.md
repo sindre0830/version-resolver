@@ -1,10 +1,14 @@
-# [Action Name]
+# Version Resolver
 
-[Provide a concise description of what this GitHub Action does.]
+**Version Resolver** is a GitHub Action designed to resolve the next version tag based on semantic versioning rules. It retrieves and filters existing tags, allowing users to specify prefixes and postfixes for targeted version streams, and calculates the next version tag based on major, minor, or patch increments.
+
+This action is particularly useful in release workflows, where it helps automate the process of determining the next version, ensuring consistent versioning across multiple release streams without manual intervention.
 
 ## Motivation
 
-[Provide a short description of the motivation you had when making this GitHub Action.]
+Managing version tags consistently across multiple release streams can be challenging, especially in environments with strict versioning standards or complex tag naming conventions. Manual calculations of the next version are prone to error, and filtering through existing tags can be time-consuming.
+
+**Version Resolver** was created to simplify this process by automating the retrieval, filtering, and calculation of the next version tag. With support for customizable prefixes and postfixes, this action makes it easy to handle multiple release streams or semantic versioning policies, reducing the risk of errors and ensuring accuracy in your CI/CD workflows.
 
 ---
 
@@ -21,31 +25,40 @@ on:
       - main
 
 jobs:
-  example_job:
+  version_resolve:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Use this action
-        uses: your-organization/your-action-name@v1
+      - name: Resolve next version
+        id: version_step
+        uses: your-organization/version-resolver@v1
         with:
-          input_name: "example"
+          bump_type: "minor"
+          prefix: "v"
+
+      - name: Print versions
+        run: |
+          echo "Next version: ${{ steps.version_step.outputs.next_version }}"
+          echo "Previous version: ${{ steps.version_step.outputs.previous_version }}"
 ```
 
 ### Inputs
 
-| Name          | Description                           | Type     | Default/Required |
-|---------------|---------------------------------------|----------|------------------|
-| `input_name`  | [Description of the input]            | `string` | Required         |
-| `another_input` | [Description of another input]       | `string` | `default_value`  |
+| Name             | Description                                      | Type     | Default/Required |
+|------------------|--------------------------------------------------|----------|------------------|
+| `bump_type`      | The type of bump to perform (`major`, `minor`, `patch`). | `string` | Required         |
+| `prefix`         | The prefix to use for finding the current version. | `string` | Default: `''`    |
+| `postfix`        | The postfix to use for finding the current version. | `string` | Default: `''`    |
+| `current_version`| The current version to bump, if you prefer to provide it manually instead of detecting it. | `string` | Optional         |
 
 ### Outputs
 
-| Name           | Description                         |
-|----------------|-------------------------------------|
-| `output_name`  | [Description of the output]         |
-| `another_output` | [Description of another output]    |
+| Name              | Description                                      |
+|-------------------|--------------------------------------------------|
+| `next_version`    | The next version without the prefix and postfix. |
+| `previous_version`| The previous version without the prefix and postfix. |
 
 ---
 
