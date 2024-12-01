@@ -1,0 +1,41 @@
+name: Release Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump_type:
+          type: choice
+          description: Select the type of version bump
+          options:
+              - major
+              - minor
+              - patch
+          required: true
+
+jobs:
+  setup:
+    name: Setup workflow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get new version
+        id: version-resolver
+        uses: sindre0830/version-resolver@v1.0.0
+        with:
+          bump_type: ${{ github.event.inputs.bump_type }}
+          prefix: v
+
+      - name: Get project version
+        id: extract-project-version
+        uses: sindre0830/extract-project-version@v1.0.4
+        with:
+          file_path: './package.json'
+
+      - name: Verify project version
+        run: |
+          if [ "${{ steps.extract-project-version.outputs.version }}" != "${{ steps.version-resolver.outputs.current_version }}" ]; then
+            echo "The project version does not match the current version. Please update the project version to match the current version."
+            exit 1
+          fi
