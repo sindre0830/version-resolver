@@ -4,13 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       bump_type:
-          type: choice
           description: Select the type of version bump
+          required: true
+          default: 'patch'
+          type: choice
           options:
               - major
               - minor
               - patch
-          required: true
 
 jobs:
   setup:
@@ -24,7 +25,7 @@ jobs:
         id: version-resolver
         uses: sindre0830/version-resolver@v1.0.0
         with:
-          bump_type: ${{ github.event.inputs.bump_type }}
+          bump_type: ${{ inputs.bump_type }}
           prefix: v
 
       - name: Get project version
