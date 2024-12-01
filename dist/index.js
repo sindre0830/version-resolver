@@ -55,8 +55,10 @@ const utils_1 = __nccwpck_require__(8479);
 function execute() {
     return __awaiter(this, void 0, void 0, function* () {
         const inputs = (0, utils_1.getInputs)();
-        const result = (0, utils_1.performLogic)(inputs);
-        core.setOutput("bool3", result);
+        const currentVersion = (0, utils_1.getCurrentVersion)(inputs.prefix, inputs.postfix, inputs.currentVersion);
+        const nextVersion = (0, utils_1.bumpVersion)(currentVersion, inputs.bumpType);
+        core.setOutput("next_version", nextVersion);
+        core.setOutput("current_version", currentVersion);
     });
 }
 function run() {
@@ -65,12 +67,29 @@ function run() {
             yield execute();
         }
         catch (error) {
-            core.setFailed(`Action failed with error: ${error instanceof Error ? error.message : error}`);
+            core.setFailed(`${error instanceof Error ? error.message : error}`);
         }
     });
 }
 void run();
 //# sourceMappingURL=main.js.map
+
+/***/ }),
+
+/***/ 5299:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BumpType = void 0;
+var BumpType;
+(function (BumpType) {
+    BumpType["Major"] = "major";
+    BumpType["Minor"] = "minor";
+    BumpType["Patch"] = "patch";
+})(BumpType || (exports.BumpType = BumpType = {}));
+//# sourceMappingURL=types.js.map
 
 /***/ }),
 
@@ -114,16 +133,78 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getInputs = getInputs;
-exports.performLogic = performLogic;
+exports.getCurrentVersion = getCurrentVersion;
+exports.bumpVersion = bumpVersion;
+const child_process = __importStar(__nccwpck_require__(5317));
 const core = __importStar(__nccwpck_require__(6201));
+const types_1 = __nccwpck_require__(5299);
 function getInputs() {
     return {
-        bool1: core.getBooleanInput("bool1"),
-        bool2: core.getBooleanInput("bool2"),
+        bumpType: core.getInput("bump_type", { required: true }),
+        prefix: core.getInput("prefix"),
+        postfix: core.getInput("postfix"),
+        currentVersion: core.getInput("current_version"),
     };
 }
-function performLogic(inputs) {
-    return inputs.bool1 === inputs.bool2;
+function getCurrentVersion(prefix, postfix, providedCurrentVersion) {
+    if (providedCurrentVersion) {
+        if (!isValidSemver(providedCurrentVersion)) {
+            throw new Error(`Invalid semantic version: ${providedCurrentVersion}`);
+        }
+        return providedCurrentVersion;
+    }
+    const tagsOutput = child_process.execSync("git tag --list", {
+        encoding: "utf-8",
+    });
+    const tags = tagsOutput
+        .split("\n")
+        .map((tag) => tag.trim())
+        .filter((tag) => tag);
+    const filteredTags = tags.filter((tag) => {
+        const strippedTag = tag.slice(prefix.length, tag.length - postfix.length);
+        return (tag.startsWith(prefix) &&
+            tag.endsWith(postfix) &&
+            isValidSemver(strippedTag));
+    });
+    if (filteredTags.length === 0) {
+        return "0.0.0";
+    }
+    const sortedTags = filteredTags.sort((a, b) => {
+        const versionA = a.slice(prefix.length, a.length - postfix.length);
+        const versionB = b.slice(prefix.length, b.length - postfix.length);
+        return compareSemver(versionA, versionB);
+    });
+    const latestTag = sortedTags[sortedTags.length - 1];
+    return latestTag.slice(prefix.length, latestTag.length - postfix.length);
+}
+function bumpVersion(version, bumpType) {
+    if (!isValidSemver(version)) {
+        throw new Error(`Invalid semantic version: ${version}`);
+    }
+    const [major, minor, patch] = version.split(".").map(Number);
+    switch (bumpType) {
+        case types_1.BumpType.Major:
+            return `${major + 1}.0.0`;
+        case types_1.BumpType.Minor:
+            return `${major}.${minor + 1}.0`;
+        case types_1.BumpType.Patch:
+            return `${major}.${minor}.${patch + 1}`;
+        default:
+            throw new Error(`Unknown bump type: ${bumpType}`);
+    }
+}
+function compareSemver(versionA, versionB) {
+    const [majorA, minorA, patchA] = versionA.split(".").map(Number);
+    const [majorB, minorB, patchB] = versionB.split(".").map(Number);
+    if (majorA !== majorB)
+        return majorA - majorB;
+    if (minorA !== minorB)
+        return minorA - minorB;
+    return patchA - patchB;
+}
+function isValidSemver(version) {
+    const semverRegex = /^(\d+)\.(\d+)\.(\d+)$/;
+    return semverRegex.test(version);
 }
 //# sourceMappingURL=utils.js.map
 

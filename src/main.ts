@@ -1,19 +1,25 @@
 import * as core from "@actions/core";
-import { getInputs, performLogic } from "./utils";
+import { bumpVersion, getCurrentVersion, getInputs } from "./utils";
 
 export async function execute(): Promise<void> {
   const inputs = getInputs();
-  const result = performLogic(inputs);
-  core.setOutput("bool3", result);
+  const currentVersion = getCurrentVersion(
+    inputs.prefix,
+    inputs.postfix,
+    inputs.currentVersion,
+  );
+
+  const nextVersion = bumpVersion(currentVersion, inputs.bumpType);
+
+  core.setOutput("next_version", nextVersion);
+  core.setOutput("current_version", currentVersion);
 }
 
 async function run(): Promise<void> {
   try {
     await execute();
   } catch (error) {
-    core.setFailed(
-      `Action failed with error: ${error instanceof Error ? error.message : error}`,
-    );
+    core.setFailed(`${error instanceof Error ? error.message : error}`);
   }
 }
 

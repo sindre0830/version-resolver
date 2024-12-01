@@ -41,7 +41,7 @@ jobs:
       - name: Print versions
         run: |
           echo "Next version: ${{ steps.version_step.outputs.next_version }}"
-          echo "Previous version: ${{ steps.version_step.outputs.previous_version }}"
+          echo "Current version: ${{ steps.version_step.outputs.current_version }}"
 ```
 
 ### Inputs
@@ -58,7 +58,7 @@ jobs:
 | Name              | Description                                      |
 |-------------------|--------------------------------------------------|
 | `next_version`    | The next version without the prefix and postfix. |
-| `previous_version`| The previous version without the prefix and postfix. |
+| `current_version`| The current version without the prefix and postfix. |
 
 ---
 

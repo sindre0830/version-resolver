@@ -1,4 +1,12 @@
 export interface ActionInputs {
-  bool1: boolean;
-  bool2: boolean;
+  bumpType: BumpType;
+  prefix: string;
+  postfix: string;
+  currentVersion: string;
+}
+
+export enum BumpType {
+  Major = "major",
+  Minor = "minor",
+  Patch = "patch",
 }
