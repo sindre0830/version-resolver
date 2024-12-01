@@ -1,21 +1,28 @@
-name: Template Action
+name: Version Resolver
 author: sindre0830
-description: A template action
+description: Resolves the next version tag based on semantic versioning rules
 branding:
   icon: package
   color: black
 
 inputs:
-  bool1:
-    description: A boolean input
-    default: 'true'
-  bool2:
-    description: Another boolean input
-    default: 'true'
+  bump_type:
+    description: The type of bump to perform (major, minor, patch)
+    required: true
+  prefix:
+    description: The prefix to use for finding the current version
+    default: ''
+  postfix:
+    description: The postfix to use for finding the current version
+    default: ''
+  current_version:
+    description: The current version to bump
 
 outputs:
-  bool3:
-    description: A boolean output
+  next_version:
+    description: The next version without the prefix and postfix
+  previous_version:
+    description: The previous version without the prefix and postfix
 
 runs:
   using: node20
