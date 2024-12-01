@@ -1,0 +1,21 @@
+{
+  "main": ".cache/main.js",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "tsc && ncc build",
+    "test": "jest --config config/jest.config.js",
+    "lint": "npx @biomejs/biome check --config-path ./config/biome.json --write ./src ./tests",
+    "lint-check": "npx @biomejs/biome check --config-path ./config/biome.json ./src ./tests"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.9.4",
+    "@types/jest": "^29.5.14",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.0"
+  }
+}
